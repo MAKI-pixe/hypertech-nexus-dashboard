@@ -1,17 +1,25 @@
 
-import { useEffect, useRef } from 'react';
-import { Github, Instagram, Linkedin, Youtube, Send, MessageCircle, Zap, Bot } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Github, Instagram, Linkedin, Youtube, Send, MessageCircle, Zap } from 'lucide-react';
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const particlesRef = useRef<HTMLDivElement>(null);
-  const robotRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
+  
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: ''
+  });
 
   useEffect(() => {
     // Criar partículas flutuantes
     const createParticles = () => {
       if (!particlesRef.current) return;
       
-      for (let i = 0; i < 50; i++) {
+      for (let i = 0; i < 30; i++) {
         const particle = document.createElement('div');
         particle.className = 'absolute bg-blue-400 rounded-full opacity-30 animate-pulse';
         particle.style.cssText = `
@@ -43,50 +51,12 @@ const Index = () => {
           }
         };
         
-        setTimeout(updateCounter, Math.random() * 3000);
-      });
-    };
-
-    // Animação do robozinho brincando
-    const animateRobot = () => {
-      if (!robotRef.current) return;
-      
-      const robot = robotRef.current;
-      let direction = 1;
-      let position = 0;
-      
-      const moveRobot = () => {
-        position += direction * 2;
-        if (position > window.innerWidth - 100) {
-          direction = -1;
-          robot.style.transform = `translateX(${position}px) scaleX(-1)`;
-        } else if (position < 0) {
-          direction = 1;
-          robot.style.transform = `translateX(${position}px) scaleX(1)`;
-        } else {
-          robot.style.transform = `translateX(${position}px) scaleX(${direction})`;
-        }
-        
-        requestAnimationFrame(moveRobot);
-      };
-      
-      moveRobot();
-    };
-
-    // Animação de circuitos robóticos
-    const createCircuits = () => {
-      const circuits = document.querySelectorAll('.circuit-line');
-      circuits.forEach((circuit, index) => {
-        setTimeout(() => {
-          circuit.classList.add('animate-pulse');
-        }, index * 500);
+        setTimeout(updateCounter, Math.random() * 2000);
       });
     };
 
     createParticles();
     animateCounters();
-    createCircuits();
-    animateRobot();
 
     return () => {
       if (particlesRef.current) {
@@ -95,6 +65,66 @@ const Index = () => {
     };
   }, []);
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.name || !formData.email || !formData.message) {
+      toast({
+        title: "Erro",
+        description: "Por favor, preencha todos os campos obrigatórios.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      // Simulando envio de email - em produção, você precisará configurar um serviço de backend
+      const emailData = {
+        to: 'kaykyb556@gmail.com',
+        subject: `[HYPERTECH] ${formData.subject || 'Nova mensagem do site'}`,
+        html: `
+          <h2>Nova mensagem do site HYPERTECH</h2>
+          <p><strong>Nome:</strong> ${formData.name}</p>
+          <p><strong>Email:</strong> ${formData.email}</p>
+          <p><strong>Assunto:</strong> ${formData.subject}</p>
+          <p><strong>Mensagem:</strong></p>
+          <p>${formData.message}</p>
+        `
+      };
+
+      // Aqui você pode integrar com um serviço como EmailJS, Netlify Forms, ou outro
+      console.log('Dados do email:', emailData);
+      
+      toast({
+        title: "Mensagem enviada!",
+        description: "Sua mensagem foi enviada com sucesso. Entraremos em contato em breve!",
+      });
+
+      // Limpar formulário
+      setFormData({
+        name: '',
+        email: '',
+        subject: '',
+        message: ''
+      });
+
+    } catch (error) {
+      toast({
+        title: "Erro ao enviar",
+        description: "Houve um problema ao enviar sua mensagem. Tente novamente.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const socialData = [
     {
       platform: 'Instagram',
@@ -102,8 +132,6 @@ const Index = () => {
       engagement: 85,
       growth: '+12.3%',
       color: 'from-blue-500 to-blue-700',
-      borderColor: 'border-blue-500',
-      bgGlow: 'shadow-blue-500/30',
       link: 'https://instagram.com/hypertech',
       icon: Instagram
     },
@@ -113,8 +141,6 @@ const Index = () => {
       engagement: 92,
       growth: '+24.7%',
       color: 'from-blue-400 to-blue-600',
-      borderColor: 'border-blue-400',
-      bgGlow: 'shadow-blue-400/30',
       link: 'https://youtube.com/@hypertech',
       icon: Youtube
     },
@@ -124,8 +150,6 @@ const Index = () => {
       engagement: 78,
       growth: '+18.9%',
       color: 'from-gray-600 to-black',
-      borderColor: 'border-gray-600',
-      bgGlow: 'shadow-gray-600/30',
       link: 'https://github.com/hypertech',
       icon: Github
     },
@@ -135,8 +159,6 @@ const Index = () => {
       engagement: 67,
       growth: '+8.4%',
       color: 'from-blue-600 to-blue-800',
-      borderColor: 'border-blue-600',
-      bgGlow: 'shadow-blue-600/30',
       link: 'https://linkedin.com/company/hypertech',
       icon: Linkedin
     }
@@ -144,17 +166,17 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-blue-900 relative overflow-hidden">
-      {/* Partículas de fundo aprimoradas */}
+      {/* Partículas de fundo */}
       <div ref={particlesRef} className="fixed inset-0 pointer-events-none z-10"></div>
       
-      {/* Efeitos de fundo robóticos aprimorados */}
+      {/* Efeitos de fundo robóticos */}
       <div className="fixed inset-0 opacity-20">
         <div className="absolute top-20 left-20 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
         <div className="absolute bottom-20 right-20 w-96 h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-1000"></div>
         <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-blue-600 rounded-full mix-blend-multiply filter blur-2xl animate-pulse delay-500"></div>
       </div>
 
-      {/* Grid lines robóticas aprimoradas */}
+      {/* Grid lines robóticas */}
       <div className="fixed inset-0 opacity-15 pointer-events-none z-5">
         <div className="absolute inset-0" style={{
           backgroundImage: `
@@ -164,26 +186,23 @@ const Index = () => {
           backgroundSize: '40px 40px'
         }}></div>
         
-        {/* Linhas de circuito */}
-        <div className="circuit-line absolute top-1/4 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-blue-400 to-transparent opacity-50"></div>
-        <div className="circuit-line absolute top-3/4 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-blue-400 to-transparent opacity-50"></div>
-        <div className="circuit-line absolute left-1/4 top-0 w-0.5 h-full bg-gradient-to-b from-transparent via-blue-400 to-transparent opacity-50"></div>
-        <div className="circuit-line absolute left-3/4 top-0 w-0.5 h-full bg-gradient-to-b from-transparent via-blue-400 to-transparent opacity-50"></div>
+        <div className="absolute top-1/4 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-blue-400 to-transparent opacity-50 animate-pulse"></div>
+        <div className="absolute top-3/4 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-blue-400 to-transparent opacity-50 animate-pulse delay-1000"></div>
+        <div className="absolute left-1/4 top-0 w-0.5 h-full bg-gradient-to-b from-transparent via-blue-400 to-transparent opacity-50 animate-pulse delay-500"></div>
+        <div className="absolute left-3/4 top-0 w-0.5 h-full bg-gradient-to-b from-transparent via-blue-400 to-transparent opacity-50 animate-pulse delay-1500"></div>
       </div>
 
-      <div className="relative z-20 max-w-7xl mx-auto p-6 pb-32">
+      <div className="relative z-20 max-w-7xl mx-auto p-6 pb-16">
         
-        {/* Header do Perfil aprimorado */}
+        {/* Header do Perfil */}
         <div className="text-center mb-16 animate-fade-in">
           <div className="relative inline-block mb-8">
-            {/* Avatar robótico aprimorado */}
             <div className="relative w-40 h-40 mx-auto">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 rounded-full animate-spin slow"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 rounded-full animate-spin" style={{ animationDuration: '8s' }}></div>
               <div className="absolute inset-3 bg-black rounded-full flex items-center justify-center border-4 border-blue-500">
                 <div className="text-5xl font-bold text-blue-400 animate-pulse">HT</div>
               </div>
               
-              {/* Elementos robóticos aprimorados */}
               <div className="absolute -top-3 -right-3 w-8 h-8 bg-blue-500 rounded-full animate-pulse flex items-center justify-center">
                 <Zap className="w-4 h-4 text-white" />
               </div>
@@ -191,7 +210,6 @@ const Index = () => {
               <div className="absolute top-1/2 -right-8 w-4 h-4 bg-blue-300 rounded-full animate-ping delay-1000"></div>
               <div className="absolute top-1/2 -left-8 w-4 h-4 bg-blue-300 rounded-full animate-ping delay-1500"></div>
               
-              {/* Anel orbital */}
               <div className="absolute inset-0 border-2 border-blue-400/30 rounded-full animate-spin" style={{ animationDuration: '10s' }}></div>
             </div>
           </div>
@@ -204,8 +222,8 @@ const Index = () => {
             🤖 Clube de Tecnologia Robótica • Inovação • Futuro • IA • Desenvolvimento 🚀
           </p>
           
-          {/* Estatísticas gerais aprimoradas */}
-          <div className="flex justify-center gap-12 mb-10">
+          {/* Estatísticas gerais */}
+          <div className="flex justify-center gap-12 mb-10 flex-wrap">
             <div className="bg-black/60 backdrop-blur-lg rounded-xl p-6 border-2 border-blue-500/40 shadow-2xl shadow-blue-500/20 hover:shadow-blue-500/40 transition-all duration-500 hover:scale-105">
               <div className="text-blue-400 text-3xl font-bold counter" data-target="127">0</div>
               <div className="text-gray-400 text-sm">MEMBROS ATIVOS</div>
@@ -229,7 +247,7 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Status online aprimorado */}
+          {/* Status online */}
           <div className="flex items-center justify-center gap-3 mb-12">
             <div className="w-4 h-4 bg-blue-400 rounded-full animate-ping"></div>
             <span className="text-blue-400 text-lg font-semibold tracking-wider">SISTEMA ONLINE • CONECTADO</span>
@@ -237,23 +255,16 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Cards de redes sociais em linha horizontal */}
+        {/* Cards de redes sociais lado a lado */}
         <div className="mb-16">
           <h2 className="text-3xl font-bold text-center text-blue-400 mb-8 animate-pulse">REDES SOCIAIS</h2>
-          <div className="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
             {socialData.map((social, index) => {
               const IconComponent = social.icon;
               return (
                 <div 
                   key={social.platform}
-                  className={`
-                    bg-black/70 backdrop-blur-xl rounded-2xl p-6 
-                    border-2 ${social.borderColor} 
-                    shadow-2xl ${social.bgGlow} hover:shadow-2xl
-                    transition-all duration-700 hover:scale-110 
-                    hover:-translate-y-4 group relative overflow-hidden
-                    animate-fade-in flex-1 min-w-[280px] max-w-[320px]
-                  `}
+                  className="bg-black/70 backdrop-blur-xl rounded-2xl p-6 border-2 border-blue-500/40 shadow-2xl shadow-blue-500/20 hover:shadow-blue-500/40 transition-all duration-700 hover:scale-105 hover:-translate-y-2 group relative overflow-hidden animate-fade-in"
                   style={{ animationDelay: `${index * 0.2}s` }}
                 >
                   {/* Efeito de circuito no fundo */}
@@ -278,7 +289,6 @@ const Index = () => {
                   </div>
 
                   <div className="space-y-4 mb-6">
-                    {/* Seguidores */}
                     <div className="bg-black/50 rounded-xl p-4 border border-blue-500/30 text-center">
                       <div className="text-2xl font-bold text-blue-400 counter" data-target={social.followers}>
                         0
@@ -286,14 +296,12 @@ const Index = () => {
                       <div className="text-gray-400 text-sm">SEGUIDORES</div>
                     </div>
                     
-                    {/* Engajamento */}
                     <div className="bg-black/50 rounded-xl p-4 border border-blue-500/30 text-center">
                       <div className="text-2xl font-bold text-blue-400">{social.engagement}%</div>
                       <div className="text-gray-400 text-sm">ENGAJAMENTO</div>
                     </div>
                   </div>
 
-                  {/* Barra de progresso robótica */}
                   <div className="mb-6">
                     <div className="flex items-center gap-2 mb-2">
                       <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
@@ -301,27 +309,18 @@ const Index = () => {
                     </div>
                     <div className="h-3 bg-black/60 rounded-full border border-blue-500/30 overflow-hidden">
                       <div 
-                        className="h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-full transition-all duration-3000 ease-out relative"
+                        className="h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-full transition-all duration-3000 ease-out relative animate-pulse"
                         style={{ width: `${social.engagement}%` }}
                       >
-                        <div className="absolute inset-0 bg-blue-400/50 animate-pulse rounded-full"></div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Botão de acesso */}
                   <a
                     href={social.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`
-                      block w-full py-4 px-6 bg-gradient-to-r ${social.color} 
-                      text-white text-center font-bold rounded-xl 
-                      hover:shadow-2xl hover:shadow-blue-500/50 
-                      transition-all duration-500 transform hover:scale-105
-                      border border-blue-500/50 relative overflow-hidden
-                      group-hover:animate-pulse
-                    `}
+                    className={`block w-full py-4 px-6 bg-gradient-to-r ${social.color} text-white text-center font-bold rounded-xl hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-500 transform hover:scale-105 border border-blue-500/50 relative overflow-hidden group-hover:animate-pulse`}
                   >
                     <span className="relative z-10">ACESSAR {social.platform.toUpperCase()}</span>
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-0 transition-transform duration-1000"></div>
@@ -343,20 +342,28 @@ const Index = () => {
             <p className="text-gray-300 text-lg">Entre em contato conosco! Queremos ouvir suas ideias sobre tecnologia e robótica.</p>
           </div>
 
-          <form className="max-w-2xl mx-auto space-y-6">
+          <form onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-blue-400 font-semibold mb-2">NOME</label>
+                <label className="block text-blue-400 font-semibold mb-2">NOME *</label>
                 <input 
-                  type="text" 
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  required
                   className="w-full p-4 bg-black/60 border-2 border-blue-500/30 rounded-xl text-white placeholder-gray-400 focus:border-blue-400 focus:outline-none transition-all duration-300 hover:border-blue-500/50"
                   placeholder="Seu nome completo"
                 />
               </div>
               <div>
-                <label className="block text-blue-400 font-semibold mb-2">EMAIL</label>
+                <label className="block text-blue-400 font-semibold mb-2">EMAIL *</label>
                 <input 
-                  type="email" 
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  required
                   className="w-full p-4 bg-black/60 border-2 border-blue-500/30 rounded-xl text-white placeholder-gray-400 focus:border-blue-400 focus:outline-none transition-all duration-300 hover:border-blue-500/50"
                   placeholder="seu@email.com"
                 />
@@ -366,15 +373,22 @@ const Index = () => {
             <div>
               <label className="block text-blue-400 font-semibold mb-2">ASSUNTO</label>
               <input 
-                type="text" 
+                type="text"
+                name="subject"
+                value={formData.subject}
+                onChange={handleInputChange}
                 className="w-full p-4 bg-black/60 border-2 border-blue-500/30 rounded-xl text-white placeholder-gray-400 focus:border-blue-400 focus:outline-none transition-all duration-300 hover:border-blue-500/50"
                 placeholder="Assunto da mensagem"
               />
             </div>
             
             <div>
-              <label className="block text-blue-400 font-semibold mb-2">MENSAGEM</label>
+              <label className="block text-blue-400 font-semibold mb-2">MENSAGEM *</label>
               <textarea 
+                name="message"
+                value={formData.message}
+                onChange={handleInputChange}
+                required
                 rows={6}
                 className="w-full p-4 bg-black/60 border-2 border-blue-500/30 rounded-xl text-white placeholder-gray-400 focus:border-blue-400 focus:outline-none transition-all duration-300 hover:border-blue-500/50 resize-none"
                 placeholder="Escreva sua mensagem aqui... Conte-nos sobre seus projetos, ideias ou como podemos colaborar!"
@@ -396,7 +410,7 @@ const Index = () => {
 
         {/* Footer robótico */}
         <div className="text-center pb-8">
-          <div className="flex justify-center items-center gap-4 text-blue-400 text-lg mb-4">
+          <div className="flex justify-center items-center gap-4 text-blue-400 text-lg mb-4 flex-wrap">
             <div className="w-3 h-3 bg-blue-400 rounded-full animate-ping"></div>
             <span>HYPERTECH © 2024 • TECNOLOGIA AVANÇADA • FUTURO HOJE</span>
             <div className="w-3 h-3 bg-blue-400 rounded-full animate-ping"></div>
@@ -405,36 +419,6 @@ const Index = () => {
             Construindo o futuro com tecnologia e inovação 🚀
           </div>
         </div>
-      </div>
-
-      {/* Robozinho brincando na parte inferior */}
-      <div className="fixed bottom-0 left-0 w-full h-24 pointer-events-none z-30 overflow-hidden">
-        <div 
-          ref={robotRef}
-          className="absolute bottom-2 w-20 h-20 bg-gradient-to-r from-blue-500 to-blue-700 rounded-full flex items-center justify-center shadow-2xl shadow-blue-500/50 transition-all duration-200 animate-bounce"
-          style={{ 
-            background: 'linear-gradient(45deg, #3b82f6, #1e40af)',
-            boxShadow: '0 0 30px rgba(59, 130, 246, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.2)'
-          }}
-        >
-          <Bot className="w-10 h-10 text-white animate-pulse" />
-          
-          {/* Olhinhos piscando */}
-          <div className="absolute top-3 left-4 w-2 h-2 bg-white rounded-full animate-ping"></div>
-          <div className="absolute top-3 right-4 w-2 h-2 bg-white rounded-full animate-ping delay-500"></div>
-          
-          {/* Antenas */}
-          <div className="absolute -top-2 left-6 w-1 h-4 bg-blue-300 rounded-full animate-pulse"></div>
-          <div className="absolute -top-2 right-6 w-1 h-4 bg-blue-300 rounded-full animate-pulse delay-300"></div>
-          
-          {/* Efeito de rastro */}
-          <div className="absolute inset-0 rounded-full bg-blue-400/30 animate-ping"></div>
-        </div>
-        
-        {/* Rastro de partículas atrás do robô */}
-        <div className="absolute bottom-6 left-10 w-2 h-2 bg-blue-400 rounded-full animate-ping opacity-60"></div>
-        <div className="absolute bottom-8 left-20 w-1 h-1 bg-blue-300 rounded-full animate-pulse opacity-40"></div>
-        <div className="absolute bottom-7 left-30 w-1 h-1 bg-blue-500 rounded-full animate-ping opacity-50 delay-200"></div>
       </div>
     </div>
   );
