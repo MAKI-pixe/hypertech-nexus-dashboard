@@ -1,9 +1,10 @@
 
 import { useEffect, useRef } from 'react';
-import { Github, Instagram, Linkedin, Youtube, Send, MessageCircle, Zap } from 'lucide-react';
+import { Github, Instagram, Linkedin, Youtube, Send, MessageCircle, Zap, Bot } from 'lucide-react';
 
 const Index = () => {
   const particlesRef = useRef<HTMLDivElement>(null);
+  const robotRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Criar partículas flutuantes
@@ -46,6 +47,32 @@ const Index = () => {
       });
     };
 
+    // Animação do robozinho brincando
+    const animateRobot = () => {
+      if (!robotRef.current) return;
+      
+      const robot = robotRef.current;
+      let direction = 1;
+      let position = 0;
+      
+      const moveRobot = () => {
+        position += direction * 2;
+        if (position > window.innerWidth - 100) {
+          direction = -1;
+          robot.style.transform = `translateX(${position}px) scaleX(-1)`;
+        } else if (position < 0) {
+          direction = 1;
+          robot.style.transform = `translateX(${position}px) scaleX(1)`;
+        } else {
+          robot.style.transform = `translateX(${position}px) scaleX(${direction})`;
+        }
+        
+        requestAnimationFrame(moveRobot);
+      };
+      
+      moveRobot();
+    };
+
     // Animação de circuitos robóticos
     const createCircuits = () => {
       const circuits = document.querySelectorAll('.circuit-line');
@@ -59,6 +86,7 @@ const Index = () => {
     createParticles();
     animateCounters();
     createCircuits();
+    animateRobot();
 
     return () => {
       if (particlesRef.current) {
@@ -143,7 +171,7 @@ const Index = () => {
         <div className="circuit-line absolute left-3/4 top-0 w-0.5 h-full bg-gradient-to-b from-transparent via-blue-400 to-transparent opacity-50"></div>
       </div>
 
-      <div className="relative z-20 max-w-7xl mx-auto p-6">
+      <div className="relative z-20 max-w-7xl mx-auto p-6 pb-32">
         
         {/* Header do Perfil aprimorado */}
         <div className="text-center mb-16 animate-fade-in">
@@ -209,10 +237,10 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Cards de redes sociais em grid horizontal */}
+        {/* Cards de redes sociais em linha horizontal */}
         <div className="mb-16">
           <h2 className="text-3xl font-bold text-center text-blue-400 mb-8 animate-pulse">REDES SOCIAIS</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto">
             {socialData.map((social, index) => {
               const IconComponent = social.icon;
               return (
@@ -224,9 +252,9 @@ const Index = () => {
                     shadow-2xl ${social.bgGlow} hover:shadow-2xl
                     transition-all duration-700 hover:scale-110 
                     hover:-translate-y-4 group relative overflow-hidden
-                    animate-fade-in
+                    animate-fade-in flex-1 min-w-[280px] max-w-[320px]
                   `}
-                  style={{ animationDelay: `${index * 0.3}s` }}
+                  style={{ animationDelay: `${index * 0.2}s` }}
                 >
                   {/* Efeito de circuito no fundo */}
                   <div className="absolute top-0 right-0 w-24 h-24 opacity-10">
@@ -377,6 +405,36 @@ const Index = () => {
             Construindo o futuro com tecnologia e inovação 🚀
           </div>
         </div>
+      </div>
+
+      {/* Robozinho brincando na parte inferior */}
+      <div className="fixed bottom-0 left-0 w-full h-24 pointer-events-none z-30 overflow-hidden">
+        <div 
+          ref={robotRef}
+          className="absolute bottom-2 w-20 h-20 bg-gradient-to-r from-blue-500 to-blue-700 rounded-full flex items-center justify-center shadow-2xl shadow-blue-500/50 transition-all duration-200 animate-bounce"
+          style={{ 
+            background: 'linear-gradient(45deg, #3b82f6, #1e40af)',
+            boxShadow: '0 0 30px rgba(59, 130, 246, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.2)'
+          }}
+        >
+          <Bot className="w-10 h-10 text-white animate-pulse" />
+          
+          {/* Olhinhos piscando */}
+          <div className="absolute top-3 left-4 w-2 h-2 bg-white rounded-full animate-ping"></div>
+          <div className="absolute top-3 right-4 w-2 h-2 bg-white rounded-full animate-ping delay-500"></div>
+          
+          {/* Antenas */}
+          <div className="absolute -top-2 left-6 w-1 h-4 bg-blue-300 rounded-full animate-pulse"></div>
+          <div className="absolute -top-2 right-6 w-1 h-4 bg-blue-300 rounded-full animate-pulse delay-300"></div>
+          
+          {/* Efeito de rastro */}
+          <div className="absolute inset-0 rounded-full bg-blue-400/30 animate-ping"></div>
+        </div>
+        
+        {/* Rastro de partículas atrás do robô */}
+        <div className="absolute bottom-6 left-10 w-2 h-2 bg-blue-400 rounded-full animate-ping opacity-60"></div>
+        <div className="absolute bottom-8 left-20 w-1 h-1 bg-blue-300 rounded-full animate-pulse opacity-40"></div>
+        <div className="absolute bottom-7 left-30 w-1 h-1 bg-blue-500 rounded-full animate-ping opacity-50 delay-200"></div>
       </div>
     </div>
   );
